@@ -7,6 +7,7 @@ image3d <- function (v, x = 1:dim(v)[1], y = 1:dim(v)[2], z = 1:dim(v)[3],
                      radius = min(diff(x), diff(y), diff(z)),
                      add = FALSE,...)
 {
+    loadRGL()
     if (!is.array(v) && length(dim(v)) != 3)
         stop("'v' must be a 3D array")
     nx <- dim(v)[1]
