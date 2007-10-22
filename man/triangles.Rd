@@ -36,8 +36,7 @@ scaleTriangles(triangles, x = 1, y = x, z = x)
     coordinates of the midpoints of the triangles making up the surface.
     The function should return a vector of colors to use for the
     triangles.}
-  \item{color2}{opposite face color; only used for "standard" and "grid"
-    engines.}
+  \item{color2}{opposite face color.}
   \item{alpha}{alpha channel level, a number between 0 and 1.}
   \item{fill}{logical; if \code{TRUE}, drawing should use filled
     surfaces; otherwise a wire frame should be drawn.}

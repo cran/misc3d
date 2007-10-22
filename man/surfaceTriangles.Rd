@@ -19,8 +19,7 @@ surfaceTriangles(x, y, f, color = "red", color2 = NA, alpha = 1,
     coordinates of the midpoints of the triangles making up the surface.
     The function should return a vector of colors to use for the
     triangles.}
-  \item{color2}{opposite face color; only used for "standard" and "grid"
-    engines.}
+  \item{color2}{opposite face color.}
   \item{alpha}{alpha channel level, a number between 0 and 1..}
   \item{fill}{logical; if \code{TRUE}, drawing should use filled
     surfaces; otherwise a wire frame should be drawn.}
@@ -40,6 +39,8 @@ surfaceTriangles(x, y, f, color = "red", color2 = NA, alpha = 1,
 }
 \examples{
   drawScene(surfaceTriangles(seq(-1,1,len=30), seq(-1,1,len=30),
+                             function(x, y) (x^2 + y^2), color2 = "green"))
+  drawScene.rgl(surfaceTriangles(seq(-1,1,len=30), seq(-1,1,len=30),
                              function(x, y) (x^2 + y^2), color2 = "green"))
 }
 }

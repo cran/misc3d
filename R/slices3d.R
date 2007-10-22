@@ -15,12 +15,13 @@ vslice <- function(vol, which, k, tpt = 1) {
                z = vol[,,k])
 }
 
-slices3d <- function(vol, scale = 0.8, col=gray.colors(512), cross = TRUE) {
+slices3d <- function(vol, main="Three Planes View", scale = 0.8, col=gray.colors(512), cross = TRUE) {
     if (! require(tkrplot)) stop("tkrplot is required.");
     r <- range(vol,na.rm = TRUE)
     d <- dim(vol)
     dn <- c("x", "y", "z", "t")
     tt <- tktoplevel()
+    tktitle(tt) <- main
     bb <- c(round(d[1:3]) / 2, 1)
     bbv <- lapply(bb, tclVar)
     mkimg <- function(which) {
@@ -39,8 +40,8 @@ slices3d <- function(vol, scale = 0.8, col=gray.colors(512), cross = TRUE) {
     }
     mkscale <- function(i) {
         f <- function(...) {
-            b <- as.numeric(tclvalue(bbv[[i]]))
-            if (b != bb[i]) {
+             b <- as.numeric(tclvalue(bbv[[i]]))
+             if (b != bb[i]) {
                 bb[i] <<- b
                 if (cross || i == 4)
                     for (j in 1:3) tkrreplot(img[[j]])
@@ -52,10 +53,26 @@ slices3d <- function(vol, scale = 0.8, col=gray.colors(512), cross = TRUE) {
         s <- tkscale(fr, command=f, from=1, to=d[i], resolution=1,
                 variable=bbv[[i]], showvalue=FALSE, orient="horiz")
         l1 <- tklabel(fr, text = dn[i])
-        l2 <- tklabel(fr, text = bb[i])
+        l2 <- tklabel(fr, textvariable = bbv[[i]])
         tkgrid(l1, s, l2)
         fr
     }
+    move <- function(which){
+        switch(which,
+               x = { i <- 1; j <- 2; k <- 3 },
+               y = { i <- 2; j <- 1; k <- 3 },
+               z = { i <- 3; j <- 1; k <- 2 })
+        tkbind(img[[i]],"<Button-1>", function(x,y){
+          wid <- as.integer(tkwinfo("width",img[[i]]))
+          hei <- as.integer(tkwinfo("height",img[[i]]))
+          bb[j] <<- as.numeric(x)/wid*d[j]
+          bb[k] <<- d[k] - as.numeric(y)/hei*d[k]
+          for (j in 1:3){
+            tkrreplot(img[[j]])
+            tclvalue(bbv[[j]]) <<- as.character(round(bb[j]))
+          }
+        })
+      }
     s <- lapply(1:3, mkscale)
     img <- lapply(c("x", "y", "z"), mkimg)
     tkgrid(img[[1]], img[[2]])
@@ -64,5 +81,7 @@ slices3d <- function(vol, scale = 0.8, col=gray.colors(512), cross = TRUE) {
     if (length(d) == 4 && d[4] > 1)
         tkgrid(s[[3]], mkscale(4))
     else tkgrid(s[[3]])
+    lapply(c("x", "y", "z"), move)
+
     environment()
 }

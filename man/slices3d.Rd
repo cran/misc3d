@@ -6,10 +6,11 @@
   dimensional volume data.
 }
 \usage{
-slices3d(vol, scale = 0.8, col=gray.colors(512), cross = TRUE)
+slices3d(vol, main, scale = 0.8, col=gray.colors(512), cross = TRUE)
 }
 \arguments{
   \item{vol}{a three or four dimensional real array.}
+  \item{main}{a character vector; main title for the plot.} 
   \item{scale}{real value for scaling embedded plot size.}
   \item{col}{a list of colors.}
   \item{cross}{logical; if \code{TRUE}, show cross hairs of current slices.}
@@ -31,13 +32,13 @@ slices3d(vol, scale = 0.8, col=gray.colors(512), cross = TRUE)
   x<-seq(-2, 2, len=40)
   g<-expand.grid(x = x, y = x, z = x)
   v<-array(nmix3(g$x,g$y,g$z, .5,.5), c(40,40,40))
-  slices3d(v,col=heat.colors(256))
+  slices3d(v,main="View of a mixture of three tri-variate normals", col=heat.colors(256))
 
 \dontrun{
   #Example 2: View of FMRI data.
   library(AnalyzeFMRI)
   a<-f.read.analyze.volume(system.file("example.img", package="AnalyzeFMRI"))
-  slices3d(aperm(a))
+  slices3d(aperm(a), main="View of FMRI")
   }
 }
 \keyword{hplot}

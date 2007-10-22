@@ -196,58 +196,52 @@ PreProcessing <- local({
                   c(3, 4, 12, 6, 7, 11, 6, 11, 2, 6, 2, 10,2, 10, 1,10,1, 9,
                     10,9, 5, 5, 9, 8, 5, 8, 6, 8, 6,  7)),
              c(1,4,2,1,6,4,1,5,6,3,6,4))
+
     switch23 <- function(x){
         num <- length(x) / 3
-        temp <- x[c(0: (num-1))*3 + 2]
-        x[c(0: (num-1))*3 + 2] <- x[c(0: (num-1))*3+ 3]
-        x[c(0: (num-1))*3 + 3] <- temp
+        temp <- x[0: (num-1)*3 + 2]
+        x[0: (num-1)*3 + 2] <- x[0: (num-1)*3+ 3]
+        x[0: (num-1)*3 + 3] <- temp
         x
     }
 
     SwitchSeq <- function(ed){
-        for (i in 1:length(ed)){
-            ver <- ed[[i]]
-            if (is.list(ver)){
-                for(j in 1:length(ver)){
-                    ed[[i]][[j]] <- switch23(ver[[j]])
-                }
-            }
-            else
-                ed[[i]] <- switch23(ver)
+        if (is.list(ed)){
+            lapply(1:length(ed), function(x) SwitchSeq(ed[[x]]))
         }
-        ed
+        else
+            switch23(ed)
     }
 
     EdgeSequence2 <- SwitchSeq(EdgeSequence1)
 
-    GetEdges <- local({
-        getedge <- function(x) {
-            case <- x[1]
-            rotation <- x[2]
-            map <- rep(0,8)
-            for(i in 1:8){
-                temp <- as.integer(BasicRotation[rotation,][i])
-                map[temp] <- i}
-            sapply(BasicEdges[[case-1]], function(x){
-                if (x!=13){
-                    EndP1 <- EdgePoints[x,2]
-                    EndP2 <- EdgePoints[x,3]
-                    newEdge <- EdgePoints[(EdgePoints[,2]==map[EndP1]
-                                           &EdgePoints[,3]==map[EndP2])|
-                                          (EdgePoints[,3]==map[EndP1]
-                                           &EdgePoints[,2]==map[EndP2]),][1]
-                }
-                else  newEdge <- 13
-                newEdge})
+    getedge <- function(x){
+        case <- x[1]
+        rotation <- x[2]
+        map <- rep(0,8)
+        for(i in 1:8){
+            temp <- as.integer(BasicRotation[rotation,][i])
+            map[temp] <- i
         }
-        Edges <-
-            apply(CaseRotationFlip[-c(1,256),], 1, getedge)
-
+        sapply(BasicEdges[[case-1]], function(x){
+            if (x!=13){
+                EndP1 <- EdgePoints[x,2]
+                EndP2 <- EdgePoints[x,3]
+                newEdge <- EdgePoints[(EdgePoints[,2]==map[EndP1]
+                                       &EdgePoints[,3]==map[EndP2])|
+                                      (EdgePoints[,3]==map[EndP1]
+                                       &EdgePoints[,2]==map[EndP2]),][1]
+             }
+            else  newEdge <- 13
+            newEdge})
+    }
+    
+    GetEdges <- local({
+        Edges <- apply(CaseRotationFlip[-c(1,256),], 1, getedge)
         Case <- cbind(seq(1:256), CaseRotationFlip[,c(1,3)])
         Edges <- apply(Case[-c(1,256),], 1, function(x){
             case <- x[2]-1
             EdgeNum <- x[1]-1
-
             if (x[3]==1)
                 sapply(EdgeSequence1[[case]], function(x) Edges[[EdgeNum]][x])
             else sapply(EdgeSequence2[[case]], function(x) Edges[[EdgeNum]][x])
@@ -262,50 +256,53 @@ PreProcessing <- local({
                          ncol=5)
     FacePoints <- cbind(FacePoints, apply(FacePoints[,2:5],1,prod))
 
-    GetFaces <- local({
-        getface <- function(x) {
-            case <- x[1]
-            rotation <- x[2]
-            map <- rep(0,8)
-            for(i in 1:8){
-                temp <- as.integer(BasicRotation[rotation,][i])
-                map[temp] <- i}
-            sapply(BasicFace[[case-1]], function(x){
-                EndP <- rep(0,4)
-                if (x==0) newFace <- 0
-                else if (x==7) newFace <- 7
-                else {
-                    for (i in 1:4){
-                        point <- FacePoints[x,i+1]
-                        EndP[i] <- map[point]
-                    }
-                    newFace<- FacePoints[FacePoints[,6]==prod(EndP[1:4]),][1]
-                }
-                newFace})
+    getface <- function(x) {
+        case <- x[1]
+        rotation <- x[2]
+        map <- rep(0,8)
+        for(i in 1:8){
+            temp <- as.integer(BasicRotation[rotation,][i])
+            map[temp] <- i
         }
-        Faces <-
-            apply(CaseRotationFlip[-c(1,256),], 1, getface)
+        sapply(BasicFace[[case-1]], function(x){
+            EndP <- rep(0,4)
+            if (x==0) newFace <- 0
+            else if (x==7) newFace <- 7
+            else {
+                for (i in 1:4){
+                     point <- FacePoints[x,i+1]
+                     EndP[i] <- map[point]
+                }
+                newFace<- FacePoints[FacePoints[,6]==prod(EndP[1:4]),][1]
+            }
+            newFace})
+    }
+    
+    flipface <- function(case, face){
+        if (face!=0){
+            index <- explode(case+1)
+            if (sum(index) > 4)
+                index <- ifelse(index==0,1,0)
+            if (face!=7 && index[FacePoints[face,2]]==0)
+                face <- -face
+            else if (face==7){
+                tcase <- CaseRotationFlip[case+1,1]-1
+                if ((tcase == 4 || tcase==6 || tcase==10 ||tcase==12)
+                    && !(index[1]+index[7]==2) && !(index[3]+index[5]==2))
+                    face <- -face
+                else if (tcase==7
+                         && !(index[1]+index[7]==0) && !(index[3]+index[5]==0))
+                    face <- -face
+            }
+        }
+        face
+    }
 
-        for (i in 1:254){
-            for(j in 1:length(Faces[[i]])){
-                x <- Faces[[i]][j]
-                if (x!=0){
-                    index <- explode(i+1)
-                    if (sum(index) > 4)
-                        index <- ifelse(index==0,1,0)
-                    if (x!=7 && index[FacePoints[x,2]]==0)
-                        Faces[[i]][j] <- -Faces[[i]][j]
-                    if (x==7){
-                        tcase <- CaseRotationFlip[i+1,1]-1
-                        if ((tcase == 4 || tcase==6 || tcase==10 ||tcase==12)
-                            && !(index[1]+index[7]==2)
-                            && !(index[3]+index[5]==2))
-                            Faces[[i]][j] <- -Faces[[i]][j]
-                        if (tcase==7 && !(index[1]+index[7]==0)
-                            && !(index[3]+index[5]==0))
-                            Faces[[i]][j] <- -Faces[[i]][j]
-                    }
-                }}}
+    GetFaces <- local({
+        Faces <- apply(CaseRotationFlip[-c(1,256),], 1, getface)
+        for (i in 1:254)
+            for(j in 1:length(Faces[[i]]))
+                Faces[[i]][j] <- flipface(i, Faces[[i]][j])
         Faces
     })
 
@@ -371,22 +368,25 @@ fgrid <- function(fun, x, y, z) {
     array(fun(g$x, g$y, g$z), c(length(x), length(y), length(z)))
 }
 
-faceType <- function(v, nx, ny, level) {
+faceType <- function(v, nx, ny, level, maxvol) {
     ## the following line replaces: v <- ifelse(v > level, 1, 0)
-    p <- v > level; v[p] <- 1; v[! p] <- 0
+    if(level==maxvol)
+      p <- v >= level
+    else p <- v > level
+    v[p] <- 1; v[! p] <- 0
     v[-nx, -ny] + 2 * v[-1, -ny] + 4 * v[-1, -1] + 8 * v[-nx, -1]
 }
 
-levCells <- function(v, level) {
+levCells <- function(v, level, maxvol) {
     nx <- dim(v)[1]
     ny <- dim(v)[2]
     nz <- dim(v)[3]
     cells <- vector("list", nz - 1)
     types <- vector("list", nz - 1)
 
-    bottomTypes <- faceType(v[,,1], nx, ny, level)
+    bottomTypes <- faceType(v[,,1], nx, ny, level, maxvol)
     for (k in 1 : (nz - 1)) {
-        topTypes <- faceType(v[,, k + 1], nx, ny, level)
+        topTypes <- faceType(v[,, k + 1], nx, ny, level, maxvol)
         cellTypes <- bottomTypes + 16 * topTypes
         contourCells <- which(cellTypes > 0 & cellTypes < 255)
         cells[[k]] <- contourCells + (nx - 1) * (ny - 1) * (k - 1)
@@ -523,28 +523,19 @@ rescale <- function(i, x) {
     x[low] + (i - low) * (x[low + 1] - x[low])
 }
 
-computeContour3d <- function (f, level,
-                              x = 1:dim(f)[1],
-                              y = 1:dim(f)[2],
-                              z = 1:dim(f)[3], mask) {
-    if (! all(is.finite(x), is.finite(y), is.finite(z)))
-        stop("'x', 'y', and 'z' values must be finite and non-missing")
+computeContour3d <- function (vol, maxvol, level,
+                              x = 1:dim(vol)[1],
+                              y = 1:dim(vol)[2],
+                              z = 1:dim(vol)[3], mask) {
+  
     nx <- length(x)
     ny <- length(y)
     nz <- length(z)
-    if (is.function(f))
-        vol <- fgrid(f, x, y, z)
-    else if (is.array(f) && length(dim(f)) == 3) {
-        if (dim(f)[1] != nx || dim(f)[2] != ny ||  dim(f)[3] != nz)
-            stop("dimensions of f do not match x, y, or z")
-        vol <- f
-    }
-    else stop("vol has to be a function or a 3-dimensional array")
 
     if (is.function(mask)) mask <- fgrid(mask, x, y, z)
     if (! all(mask)) vol[! mask] <- NA
     
-    v <- levCells(vol, level)
+    v <- levCells(vol, level, maxvol)
     tcase <- CaseRotationFlip[v$t+1,1]-1
 
     R <- which(tcase %in% c(1,2,5,8,9,11,14))
@@ -603,8 +594,10 @@ computeContour3d <- function (f, level,
     triangles
 }
 
-contourTriangles <- function(f, level,
-                             x = 1:dim(f)[1], y = 1:dim(f)[2], z = 1:dim(f)[3],
+contourTriangles <- function(vol, maxvol, level,
+                             x = 1:dim(vol)[1],
+                             y = 1:dim(vol)[2],
+                             z = 1:dim(vol)[3],
                              mask = NULL, color = "white", color2 = NA,
                              alpha = 1, fill = TRUE,
                              col.mesh = if (fill) NA else color,
@@ -620,12 +613,12 @@ contourTriangles <- function(f, level,
             cm <- if (length(col.mesh) > 1) col.mesh[[i]] else col.mesh
             mat <- if (length(material) > 1) material[[1]] else material
             sm <- if (length(smooth) > 1) smooth[[1]] else smooth
-            val[[i]] <- contourTriangles(f, level[i], x, y, z, m, col, col2,
-                                         a, fl, cm, mat, sm)
+            val[[i]] <- contourTriangles(vol, maxvol, level[i], x, y, z, m,
+                                         col, col2, a, fl, cm, mat, sm)
         }
         val
     }
-    else makeTriangles(computeContour3d(f, level, x, y, z, mask),
+    else makeTriangles(computeContour3d(vol, maxvol, level, x, y, z, mask),
                        color = color, color2 = color2, alpha = alpha,
                        fill = fill, col.mesh = col.mesh,
                        material = material, smooth = smooth)
@@ -637,8 +630,47 @@ contour3d <- function(f, level,
                       fill = TRUE, col.mesh = if (fill) NA else color,
                       material = "default", smooth = 0,
                       add = FALSE, draw = TRUE, engine = "rgl", ...){
-    scene <- contourTriangles(f, level, x, y, z, mask, color, color2, alpha,
-                              fill, col.mesh, material, smooth)
+  
+    if (! all(is.finite(x), is.finite(y), is.finite(z)))
+        stop("'x', 'y', and 'z' values must be finite and non-missing")
+    if (is.function(f) || is.array(f) && length(dim(f)) == 3){
+        if (is.function(f)){
+            if (length(formals(f)) != 3)
+                stop("The function has to have 3 arguments.")
+            vol <- fgrid(f, x, y, z)
+          }
+        else{
+          if (dim(f)[1] != length(x) || dim(f)[2] != length(y) ||  dim(f)[3] != length(z))
+            stop("dimensions of f do not match x, y, or z")
+          vol <- f
+        }
+
+        maxvol <- max(vol)
+        minvol <- min(vol)
+        con <- which(level > maxvol | level < minvol)
+        if (length(con) == length(level))
+            stop("The level has to be within the range of f")
+        else if (length(con) > 0){
+            warning(paste("The level ", level[con], " outside the range of f has been removed from the level list", sep=""))
+            level <- level[-con]
+            if (is.list(mask)) mask <- mask[-con] 
+            if (length(color) > 1) color <- color[-con] 
+            if (length(color2) > 1) color2 <- color2[-con] 
+            if (length(alpha) > 1) alpha <- alpha[-con] 
+            if (length(fill) > 1) fill <- fill[-con]
+            if (length(col.mesh) > 1) col.mesh <- col.mesh[-con]
+            if (length(material) > 1) material <- material[-con] 
+            if (length(smooth) > 1) smooth <- smooth[-con] 
+        }
+    
+      }
+
+    else stop("vol has to be a function or a 3-dimensional array")
+
+    
+    
+    scene <- contourTriangles(vol, maxvol, level, x, y, z, mask, color, color2,
+                              alpha, fill, col.mesh, material, smooth)
     if (! draw || engine == "none")
         scene
     else {

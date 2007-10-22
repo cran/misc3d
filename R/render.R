@@ -3,11 +3,13 @@ drawScene.rgl <- function(scene, add = FALSE, ...) {
     if (! rgl.cur())
         open3d()
     if (!add)
-        rgl.clear()
+        clear3d()
 
     triangles <- canonicalizeAndMergeScene(scene, "color", "alpha",
                                            "col.mesh", "fill")
     col <- rep(triangles$color, each = 3)
+    if (!is.na(triangles$color2))
+    	col2 <- rep(triangles$color2, each=3)
     alpha <- rep(triangles$alpha, each = 3)
     fill <- rep(triangles$fill, each = 3)
     col.mesh <- rep(triangles$col.mesh, each = 3)
@@ -31,13 +33,25 @@ drawScene.rgl <- function(scene, add = FALSE, ...) {
         data[,3] <- -data[,3]
     }
     if (nrow(data) > 0) # to avoid a segfault in rgl
-        rgl.triangles(data[,1], data[,2], data[,3],
+    {
+        if (is.na(triangles$color2)) 
+    	    triangles3d(data[,1], data[,2], data[,3],
                       col = col, alpha = alpha,
                       front = front, back = back, ...)
+        else {
+            triangles3d(data[,1], data[,2], data[,3],
+	              col = col, alpha = alpha,
+                      front = front, back = "cull", ...)
+            triangles3d(data[,1], data[,2], data[,3],
+	              col = col2, alpha = alpha,
+                      front = "cull", back = back, ...)
+        }
+    }
+        
 }
 
-renderScene <- function(scene, fill, col.mesh, add, engine, polynum, col.bg,
-                        depth) {
+renderScene <- function(scene, box, fill, col.mesh, add, engine, polynum,
+                        col.bg, depth) {
     triangles <- canonicalizeAndMergeScene(scene, "color", "col.light",
                                            "col.mesh", "fill")
     v1 <- triangles$v1
@@ -63,15 +77,16 @@ renderScene <- function(scene, fill, col.mesh, add, engine, polynum, col.bg,
     col.mesh <- ifelse(is.na(col.mesh), col.fill, col.mesh)
     i <- order(z, na.last = NA)
     if (engine == "grid") 
-        render.grid(v1[i,], v2[i,], v3[i,], fill[i], col.fill[i],
+        render.grid(v1[i,], v2[i,], v3[i,], box, fill[i], col.fill[i],
                     col.mesh[i], add, polynum)
-    else render.standard(v1[i,], v2[i,], v3[i,], fill[i], col.fill[i],
+    else render.standard(v1[i,], v2[i,], v3[i,], box, fill[i], col.fill[i],
                          col.mesh[i], add)
 }
 
-render.standard <- function(v1, v2, v3, fill, col.fill, col.mesh, add) {
+render.standard <- function(v1, v2, v3, box, fill, col.fill, col.mesh, add) {
     if (! add) {
-        rr <- screenRange(v1, v2, v3)
+        # rr <- screenRange(v1, v2, v3)
+        rr <- range(box)
         plot(rr, rr,type="n", axes = FALSE, ann = FALSE)
     }
     xx <- as.vector(rbind(v1[,1], v2[,1], v3[,1], NA))
@@ -79,18 +94,21 @@ render.standard <- function(v1, v2, v3, fill, col.fill, col.mesh, add) {
     polygon(xx, yy, col=col.fill, border=col.mesh)
 }
 
-render.grid <- function(v1, v2, v3, fill, col.fill, col.mesh,
+render.grid <- function(v1, v2, v3, box, fill, col.fill, col.mesh,
                         add, polynum) {
-    if (! add) {
-        rr <- screenRange(v1, v2, v3)
+    if (! add)
         grid::grid.newpage() 
-        vp <- grid::viewport(w = 0.8, h = 0.8, xscale = rr, yscale = rr)
-        grid::pushViewport(vp)
-    }
+    # rr <- screenRange(v1, v2, v3)
+    rr <- range(box)
+    grid::pushViewport(grid::viewport(w = 0.8, h = 0.8,
+                                      xscale = rr, yscale = rr,
+                                      name = "misc3dScene"))
+    on.exit(grid::upViewport())
+
     xx <- as.vector(rbind(v1[,1], v2[,1], v3[,1]))
     yy <- as.vector(rbind(v1[,2], v2[,2], v3[,2]))
     n.tri <- nrow(v1)
-    id <- rep(1:n.tri, each = 3)
+    idlen <- rep(3, n.tri)
     start <- 1
     end <- start + polynum - 1
     while (start <= n.tri) {
@@ -99,7 +117,7 @@ render.grid <- function(v1, v2, v3, fill, col.fill, col.mesh,
         j3 <- (3*start - 2) : (3 * end)
         gp <- grid::gpar(fill = col.fill[j], col = col.mesh[j])
         grid::grid.polygon(x = xx[j3], y = yy[j3], default.units = "native",
-                           gp = gp, id = id[j3]) 
+                           gp = gp, id.lengths = idlen[j]) 
         start <- start + polynum
         end <- start + polynum
     }
@@ -140,7 +158,10 @@ drawScene <- function(scene, light = c(0, 0, 1),
         scene <- addPerspective(scene, distance)
         rot.mat <- makePerspMatrix(distance) %*% rot.mat
     }
-    renderScene(scene, fill, col.mesh, add, engine, polynum, col.bg, depth)
+    box <- as.matrix(expand.grid(sr$xlim, sr$ylim,sr$zlim))
+    box <- trans3dto3d(box, rot.mat)
+    renderScene(scene, box, fill, col.mesh, add, engine, polynum,
+                col.bg, depth)
     invisible(t(rot.mat))
 }
 

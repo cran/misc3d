@@ -44,7 +44,7 @@ image3d <- function (v, x = 1:dim(v)[1], y = 1:dim(v)[2], z = 1:dim(v)[3],
             PACKAGE = "base")$code - 1
     }
     if (!add)
-        rgl.clear()
+        clear3d()
     i <- which(is.finite(vi))
     xi <- x[as.integer((i - 1) %% nx + 1)]
     yi <- y[as.integer(((i - 1) %/% nx) %% ny + 1)]
@@ -58,9 +58,9 @@ image3d <- function (v, x = 1:dim(v)[1], y = 1:dim(v)[2], z = 1:dim(v)[3],
     }
     if (sprites) {
         texture <- system.file("textures/particle.png", package="rgl")
-        rgl.sprites(xi, zi, -yi, color = col[vi], alpha = alpha[vi],
+        sprites3d(xi, zi, -yi, color = col[vi], alpha = alpha[vi],
                     lit=FALSE, radius = radius, textype="alpha",
                     texture = texture, ...)
     } 
-    else rgl.points(xi, zi, -yi, color = col[vi], alpha = alpha[vi], ...)  
+    else points3d(xi, zi, -yi, color = col[vi], alpha = alpha[vi], ...)  
 }
