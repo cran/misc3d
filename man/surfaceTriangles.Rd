@@ -43,5 +43,4 @@ surfaceTriangles(x, y, f, color = "red", color2 = NA, alpha = 1,
   drawScene.rgl(surfaceTriangles(seq(-1,1,len=30), seq(-1,1,len=30),
                              function(x, y) (x^2 + y^2), color2 = "green"))
 }
-}
 \keyword{hplot}

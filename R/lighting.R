@@ -94,12 +94,10 @@ registerMaterial("shiny", ambient = 0.36, diffuse = 0.72, specular = 1.08,
 
 ## perspLighting is an implementation of the lighting algorithm
 ## described in the help page for persp().  The 'shade' parameter of
-## persp is here named 'exponent'. It _looks_ like the shade parameter
-## used in persp may be closer to twice the value supplied to persp;
-## that is, perspLighting with shade = x seems to be comparable to
-## persp() with shade = x / 2.  Needed to rename shade to exponent.
-## Division by 8 may make this exponent vaguely comparable to the
-## Phong one.
+## persp is here named is computed from the material's 'exponent'
+## component.  To make the "default" material with expone t = 10
+## correspond to the shade = 0.75 value of the volcano example from
+## the persp help page, 'exponent' is scaled by a factor of 3 / 40.
 
 perspLighting <- function(normals, view, light, color, color2, alpha,
                           material = "default") {
@@ -115,7 +113,7 @@ perspLighting <- function(normals, view, light, color, color2, alpha,
     L <- light / sqrt(sum(light^2))
     sgn <- as.vector(normals %*% V) > 0
     N <- ifelse(sgn,1, -1) * normals
-    I <-  ((1 + as.vector(pmax(N %*% L, 0))) / 2) ^ (exponent / 8)
+    I <-  (pmax(1 + as.vector(N %*% L), 0) / 2) ^ (exponent * (3 / 40))
     Lrgbcol <- I * LI * t(col2rgb(ifelse(sgn, color, color2)) / 255)
     rgb(Lrgbcol[,1], Lrgbcol[,2], Lrgbcol[,3], alpha)
 }

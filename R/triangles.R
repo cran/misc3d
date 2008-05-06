@@ -263,8 +263,8 @@ sceneRanges <- function(scene, xlim, ylim, zlim) {
 
 addTrianglesPerspective <- function(triangles, distance) {
     pt <- function(v) {
-        v[,1] <- v[,1] / (1 - distance * v[,3])
-        v[,2] <- v[,2] / (1 - distance * v[,3])
+        v[, 1] <- v[, 1] / (1 / distance - v[, 3])
+        v[, 2] <- v[, 2] / (1 / distance - v[, 3])
         v
     }
     triangles$v1 <- pt(triangles$v1)

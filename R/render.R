@@ -51,7 +51,7 @@ drawScene.rgl <- function(scene, add = FALSE, ...) {
 }
 
 renderScene <- function(scene, box, fill, col.mesh, add, engine, polynum,
-                        col.bg, depth) {
+                        col.bg, depth, newpage) {
     triangles <- canonicalizeAndMergeScene(scene, "color", "col.light",
                                            "col.mesh", "fill")
     v1 <- triangles$v1
@@ -78,7 +78,7 @@ renderScene <- function(scene, box, fill, col.mesh, add, engine, polynum,
     i <- order(z, na.last = NA)
     if (engine == "grid") 
         render.grid(v1[i,], v2[i,], v3[i,], box, fill[i], col.fill[i],
-                    col.mesh[i], add, polynum)
+                    col.mesh[i], add, polynum, newpage)
     else render.standard(v1[i,], v2[i,], v3[i,], box, fill[i], col.fill[i],
                          col.mesh[i], add)
 }
@@ -95,15 +95,15 @@ render.standard <- function(v1, v2, v3, box, fill, col.fill, col.mesh, add) {
 }
 
 render.grid <- function(v1, v2, v3, box, fill, col.fill, col.mesh,
-                        add, polynum) {
-    if (! add)
-        grid::grid.newpage() 
-    # rr <- screenRange(v1, v2, v3)
-    rr <- range(box)
-    grid::pushViewport(grid::viewport(w = 0.8, h = 0.8,
-                                      xscale = rr, yscale = rr,
-                                      name = "misc3dScene"))
-    on.exit(grid::upViewport())
+                        add, polynum, newpage) {
+    if (! add) {
+        if (newpage) grid::grid.newpage()
+        rr <- range(box)
+        grid::pushViewport(grid::viewport(w = 0.8, h = 0.8,
+                                          xscale = rr, yscale = rr,
+                                          name = "misc3dScene"))
+        on.exit(grid::upViewport())
+    }
 
     xx <- as.vector(rbind(v1[,1], v2[,1], v3[,1]))
     yy <- as.vector(rbind(v1[,2], v2[,2], v3[,2]))
@@ -114,20 +114,20 @@ render.grid <- function(v1, v2, v3, box, fill, col.fill, col.mesh,
     while (start <= n.tri) {
         end <- min(end, n.tri)
         j <- start : end
-        j3 <- (3*start - 2) : (3 * end)
+        j3 <- (3 * start - 2) : (3 * end)
         gp <- grid::gpar(fill = col.fill[j], col = col.mesh[j])
         grid::grid.polygon(x = xx[j3], y = yy[j3], default.units = "native",
-                           gp = gp, id.lengths = idlen[j]) 
+                           gp = gp, id.lengths = idlen[j])
         start <- start + polynum
         end <- start + polynum
     }
 }
 
 makePerspMatrix <- function(d) {
-    rbind(c(1, 0,     0, 0),
-          c(0, 1,     0, 1),
-          c(0, 0, 1 + d, 0),
-          c(0, 0,    -d, 1))
+    rbind(c(1, 0,  0, 0),
+          c(0, 1,  0, 0),
+          c(0, 0,  1, 0),
+          c(0, 0, -1, 1 / d))
 }
 
 ## drawScene is a simple function for plotting triangles.  The viewer is
@@ -148,20 +148,23 @@ drawScene <- function(scene, light = c(0, 0, 1),
                       lighting = phongLighting,
                       add = FALSE,
                       engine = "standard",
-                      col.bg = "transparent", depth = 0) {
+                      col.bg = "transparent", depth = 0, newpage = TRUE) {
     scene <- colorScene(scene)
     sr <- sceneRanges(scene, xlim, ylim, zlim)
-    rot.mat <- makeViewTransform(sr, scale, aspect, screen, R.mat)
+    if (add)
+        rot.mat <- R.mat
+    else
+        rot.mat <- makeViewTransform(sr, scale, aspect, screen, R.mat)
     scene <- transformScene(scene, rot.mat)
     scene <- lightScene(scene, lighting, light)
     if (distance > 0) {
         scene <- addPerspective(scene, distance)
         rot.mat <- makePerspMatrix(distance) %*% rot.mat
     }
-    box <- as.matrix(expand.grid(sr$xlim, sr$ylim,sr$zlim))
+    box <- as.matrix(expand.grid(sr$xlim, sr$ylim, sr$zlim))
     box <- trans3dto3d(box, rot.mat)
     renderScene(scene, box, fill, col.mesh, add, engine, polynum,
-                col.bg, depth)
+                col.bg, depth, newpage)
     invisible(t(rot.mat))
 }
 

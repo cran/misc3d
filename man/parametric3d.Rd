@@ -138,5 +138,4 @@
                color = "red", color2 = "blue", material = "shiny")
 
 }
-}
 \keyword{hplot}

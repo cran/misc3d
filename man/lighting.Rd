@@ -32,7 +32,6 @@ perspLighting(normals, view, light, color, color2, alpha, material = "default")
   \code{perspLighting} implements approximately the same lighting model
   as the \code{persp} function.
 }
-}
 \keyword{hplot}
 
 

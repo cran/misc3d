@@ -58,7 +58,6 @@ scaleTriangles(triangles, x = 1, y = x, z = x)
   \code{translateTriangles} and \code{scaleTriangles} translate or scale
   the vertex locations of triangle mesh objects by specified amounts.
 }
-}
 \keyword{hplot}
 
 
