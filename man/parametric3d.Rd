@@ -16,16 +16,16 @@
     \code{x}, \code{y}, and \code{z} coordinates.}
   \item{u}{numeric vector of u values.}
   \item{v}{numeric vector of v values.}
-  \item{umin}{numeric; the minimum value of u. Ignored in \code{u} is
+  \item{umin}{numeric; the minimum value of u. Ignored if \code{u} is
     supplied.}
-  \item{umax}{numeric; the maximum value of u. Ignored in \code{u} is
+  \item{umax}{numeric; the maximum value of u. Ignored if \code{u} is
     supplied.}
-  \item{vmin}{numeric; the minimum value of v. Ignored in \code{v} is
+  \item{vmin}{numeric; the minimum value of v. Ignored if \code{v} is
     supplied.}
-  \item{vmax}{numeric; the maximum value of v. Ignored in \code{v} is
+  \item{vmax}{numeric; the maximum value of v. Ignored if \code{v} is
     supplied.}
   \item{n}{the number of equally spaced \code{u} and \code{v} values to
-    use.  Ignored in \code{u} and \code{v} are supplied.}
+    use.  Ignored if \code{u} and \code{v} are supplied.}
   \item{color}{color to use for the surface. Can also be a function of
     three arguments.  This is called with three arguments, the
     coordinates of the midpoints of the triangles making up the surface.
@@ -36,14 +36,15 @@
   \item{fill}{logical; if \code{TRUE}, drawing should use filled
     surfaces; otherwise a wire frame should be drawn.}
   \item{col.mesh}{color to use for the wire frame.}
-  \item{smooth}{integer specifying Phong shading level; currently only
-    used by "standard" and "grid" engines.}
+  \item{smooth}{integer or logical specifying Phong shading level for
+    "standard" and "grid" engines or whether or not to use shading for
+    the "rgl" engine.}
   \item{material}{material specification; currently only used by
     "standard" and "grid" engines.  Currently possible values are the
     character strings "dull", "shiny", "metal", and "default".}
   \item{add}{logical; if \code{TRUE}, add to current graph.}
   \item{draw}{logical; if \code{TRUE}, draw the results; otherwise,
-    return contour triangles.}
+    return triangle mesh structure.}
   \item{engine}{character; currently "rgl", "standard", "grid" or "none";
     for "none" the computed triangles are returned.}
   \item{...}{additional rendering arguments, e.g. material and texture
@@ -60,7 +61,7 @@
 \details{
   Analogous to Mathematica's \code{Param3D}.  Evaluates the
   functions \code{fx}, \code{fy}, and \code{fz} specifying the
-  coordinates of the surface at an equally spaced grid of values for the
+  coordinates of the surface at a grid of values for the
   parameters \code{u} and \code{v}.
 }
 \note{
@@ -78,8 +79,8 @@
    RGL: A R-library for 3D visualization with OpenGL
 }
 \seealso{
-  \code{\link[rgl]{rgl.surface}},
-  \code{\link[rgl]{rgl.material}},\code{\link[scatterplot3d]{scatterplot3d}}.
+  \code{\link[rgl]{surface3d}},
+  \code{\link[rgl]{material3d}},\code{\link[scatterplot3d]{scatterplot3d}}.
 }
 \examples{
   #Example 1: Ratio-of-Uniform sampling region of bivariate normal

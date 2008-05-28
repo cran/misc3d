@@ -2,7 +2,7 @@
 \alias{slices3d}
 \title{Interactive Image Slices of 3D or 4D Volume Data}
 \description{
-  Uses tkrplot to create an interactive slice view of three or four
+  Uses \pkg{tkrplot} to create an interactive slice view of three or four
   dimensional volume data.
 }
 \usage{

@@ -30,9 +30,9 @@
     the vector should be equal to the length of \code{col}.}
   \item{breaks}{breakpoints for the colors; must give one more
     breakpoint than colors.}
-  \item{sprites}{logical;  if \code{TRUE}, use \code{rgl.sprites} to
+  \item{sprites}{logical;  if \code{TRUE}, use \code{sprites3d} to
     draw the points.}
-  \item{radius}{radius used in \code{rgl.sprites}.}
+  \item{radius}{radius used in \code{sprites3d}.}
   \item{jitter}{logical;  if \code{TRUE}, add a small amount of noise to
     the point locations.}
   \item{add}{logical; if \code{TRUE}, add to current \code{rgl} graph.}
@@ -44,8 +44,8 @@
    RGL: A R-library for 3D visualization with OpenGL
 }
 \seealso{
-  \code{\link{image}}, \code{\link[rgl]{rgl.sprites}},
-  \code{\link[rgl]{rgl.points}}, \code{\link{jitter}}.
+  \code{\link{image}}, \code{\link[rgl]{sprites3d}},
+  \code{\link[rgl]{points3d}}, \code{\link{jitter}}.
 }
 \examples{
     # view density of mixture of tri-variate normals

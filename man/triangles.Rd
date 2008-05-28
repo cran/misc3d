@@ -24,7 +24,7 @@ scaleTriangles(triangles, x = 1, y = x, z = x)
     the triangles.  If only \code{v1} and \code{v2} are provided then
     \code{v1} should be a numeric matrix with three rows specifying
     coordinates of vertices, and \code{v2} should be an integer matrix
-    with three rows specifying the indexes if the vertices in the
+    with three rows specifying the indexes of the vertices in the
     triangles.  If only \code{v1} is provided then it should be a matrix
     with three columns and number of rows divisible by three specifying
     the vertices of the triangles in groups of three.}
@@ -41,8 +41,9 @@ scaleTriangles(triangles, x = 1, y = x, z = x)
   \item{fill}{logical; if \code{TRUE}, drawing should use filled
     surfaces; otherwise a wire frame should be drawn.}
   \item{col.mesh}{color to use for the wire frame.}
-  \item{smooth}{integer specifying Phong shading level; currently only
-    used by "standard" and "grid" engines.}
+  \item{smooth}{integer or logical specifying Phong shading level for
+    "standard" and "grid" engines or whether or not to use shading for
+    the "rgl" engine.}
   \item{material}{material specification; currently only used by
     "standard" and "grid" engines. Currently possible values are the
     character strings "dull", "shiny", "metal", and "default".}

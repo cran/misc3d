@@ -25,18 +25,18 @@ drawScene.rgl(scene, add = FALSE, ...)
     the viewer is at \code{(0, 0, 1 / distance)} looking down along the
     positive z-axis.  The fourth element, if present, represents light
     intensity; the default is 1.}
-  \item{screen}{as for \code{panel.3dwire}, a list giving sequence of
-    rotations to be applied to the scene before being rendered. The
-    initial position starts with the viewing point along the positive
-    z-axis, and the x and y axes in the usual position. Each component
-    of the list should be named one of "x", "y" or "z"; repetitions are
-    allowed.  The values values indicate the amount of rotation about
-    that axis in degrees.}
+  \item{screen}{as for \code{\link[lattice]{panel.3dwire}}, a list
+    giving sequence of rotations to be applied to the scene before being
+    rendered. The initial position starts with the viewing point along
+    the positive z-axis, and the x and y axes in the usual
+    position. Each component of the list should be named one of "x", "y"
+    or "z"; repetitions are allowed.  The values indicate the amount
+    of rotation about that axis in degrees.} 
   \item{scale}{logical. Before viewing the x, y and z coordinates of the
     scene defining the surface are transformed to the interval
     [-0.5,0.5].  If \code{scale} is true the x, y and z coordinates are
     transformed separately.  Otherwise, the coordinates are scaled so
-    that aspect ratios are retained.}
+    that aspect ratios are retained. Ignored if \code{draw = TRUE}}
   \item{R.mat}{initial rotation matrix in homogeneous coordinates, to be
     applied to the data before \code{screen} rotates the view further.}
   \item{perspective}{logical, whether to render a perspective
@@ -46,7 +46,7 @@ drawScene.rgl(scene, add = FALSE, ...)
     perspective. The distance of the viewing point from the origin (in
     the transformed coordinate system) is \code{1 / distance}. This is
     described in a little more detail in the documentation for
-    \code{cloud}.}
+    \code{\link[lattice]{cloud}}.}
   \item{fill}{logical; if \code{TRUE}, drawing should use filled
     surfaces or wire frames as indicated by the object properties.
     Otherwise all objects in the scene should be rendered as wire

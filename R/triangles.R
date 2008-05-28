@@ -48,12 +48,10 @@ t2ve <- function (triangles)
     S <- 10^5
     score <- function(v, d) floor(as.vector(v %*% d))
     scale <- function(v) (1 - 1 / S) * (v - vbmin) / (vbmax - vbmin)
-    vbs <- scale(vb)
-    d <- c(1, S, S^2)
-    scores <- score(vbs, d)
+    d <- c(S, S^2, S^3)
+    scores <- score(scale(vb), d)
     vb <- vb[! duplicated(scores),]
-    vbs <- scale(vb)
-    scores <- score(vbs, d)
+    scores <- score(scale(vb), d)
     ib <- rbind(match(score(scale(triangles$v1), d), scores),
                 match(score(scale(triangles$v2), d), scores),
                 match(score(scale(triangles$v3), d), scores))
@@ -338,6 +336,18 @@ interpolateVertexNormals <- function(VN, ib) {
     z / sqrt(rowSums(z^2))
 }
 
+## triangleVertexNormals computes the normals at the vertices by
+## averaging the normals of the incident triangles.  This is used by
+## the rgl engine.  The result form is chosen so zipTriangles can be
+## used on it.
+triangleVertexNormals <- function(v) {
+    N <- triangleNormals(v)
+    ve <- t2ve(v)
+    vt <- vertexTriangles(ve)
+    VN <- misc3d:::vertexNormals(vt, N)
+    list(v1 = VN[ve$ib[1,],], v2 = VN[ve$ib[2,],], v3 = VN[ve$ib[3,],])
+}
+
 vertexColors <- function(vt, col) {
     C <- t(col2rgb(col))
     val <- matrix(0, nrow = length(vt), ncol = 3)
@@ -422,3 +432,51 @@ surfaceTriangles <- function(x, y, f,
                   material = material, col.mesh = col.mesh, alpha = alpha)
 }
 
+## pointsTetrahedra computes a collection of tetrahedra centered at
+## the specified point locations.  This is useful, for example, for
+## displaying raw data along with a density contour in a scene
+## rendered with standard or grid graphics. Random orientation might
+## be useful to avoid strange results at certain lighting angles.
+
+pointsTetrahedra <- function(x, y, z, size = 0.01, color = "black", ...) {
+    n <- length(x)
+    if (length(y) != n || length(z) != n)
+        stop("coordinate vectors must be the same length.")
+
+    ## Create a basic tetrahedron centered at the origin
+    a <- sqrt(3) / 2
+    b <- 1 / (2 * sqrt(3))
+    h <- sqrt(2 / 3)
+
+    mx <- 1 / 2
+    my <- (a + b) / 4
+    mz <- h / 4
+
+    A <- c(       -mx,    -my,    -mz)  
+    B <- c(    1 - mx,    -my,    -mz)
+    C <- c(1 / 2 - mx, a - my,    -mz)
+    D <- c(1 / 2 - mx, b - my, h - mz)
+
+    v1 <- rbind(B, A, B, C)
+    v2 <- rbind(A, B, C, A)
+    v3 <- rbind(C, D, D, D)
+
+    ## Scale the tetrahedron
+    if (length(size) < 3) size <- rep(size, len = 3)
+    if (n == 1) s <- diag(size)
+    else s <- diag(size * c(diff(range(x)), diff(range(y)), diff(range(z))))
+    sv1 <- v1 %*% s
+    sv2 <- v2 %*% s
+    sv3 <- v3 %*% s
+
+    ## Compute the tetrahedra for the points, taking advantage of recycling
+    x4 <- rep(x, each = 4)
+    y4 <- rep(y, each = 4)
+    z4 <- rep(z, each = 4)
+  
+    V1 <- cbind(x4 + sv1[,1], y4 + sv1[,2], z4 + sv1[,3])
+    V2 <- cbind(x4 + sv2[,1], y4 + sv2[,2], z4 + sv2[,3])
+    V3 <- cbind(x4 + sv3[,1], y4 + sv3[,2], z4 + sv3[,3])
+
+    makeTriangles(V1, V2, V3, color = color, ...)
+}

@@ -37,9 +37,9 @@
     length of \code{'levels'}.}
   \item{col.mesh}{color to use for the wire frame. Recycled to the
     length of \code{'levels'}.}
-  \item{smooth}{integer specifying Phong shading level; currently only
-    used by "standard" and "grid" engines. Recycled to the length of
-    \code{'levels'}.}
+  \item{smooth}{integer or logical specifying Phong shading level for
+    "standard" and "grid" engines or whether or not to use shading for
+    the "rgl" engine. Recycled to the length of \code{'levels'}.}
   \item{material}{material specification; currently only used by
     "standard" and "grid" engines. Currently possible values are the
     character strings "dull", "shiny", "metal", and "default".  Recycled
@@ -93,8 +93,8 @@
  \emph{Proc. IEEE Visualization}  \bold{92}, 83-91
 } 
 \seealso{
-  \code{\link[rgl]{rgl.triangles}}, \code{\link[rgl]{rgl.material}},
-  \code{\link[rgl]{rgl.surface}}.
+  \code{\link[rgl]{triangles3d}}, \code{\link[rgl]{material3d}},
+  \code{\link[rgl]{surface3d}}.
 }
 \examples{
   #Example 1: Draw a ball

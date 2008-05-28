@@ -635,8 +635,8 @@ contour3d <- function(f, level,
         stop("'x', 'y', and 'z' values must be finite and non-missing")
     if (is.function(f) || is.array(f) && length(dim(f)) == 3){
         if (is.function(f)){
-            if (length(formals(f)) != 3)
-                stop("The function has to have 3 arguments.")
+            if (length(formals(f)) < 3)
+                stop("The function must have at least 3 arguments.")
             vol <- fgrid(f, x, y, z)
           }
         else{

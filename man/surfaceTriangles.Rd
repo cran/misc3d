@@ -24,15 +24,16 @@ surfaceTriangles(x, y, f, color = "red", color2 = NA, alpha = 1,
   \item{fill}{logical; if \code{TRUE}, drawing should use filled
     surfaces; otherwise a wire frame should be drawn.}
   \item{col.mesh}{color to use for the wire frame.}
-  \item{smooth}{integer specifying Phong shading level; currently only
-    used by "standard" and "grid" engines.}
+  \item{smooth}{integer or logical specifying Phong shading level for
+    "standard" and "grid" engines or whether or not to use shading for
+    the "rgl" engine.}
   \item{material}{material specification; currently only used by
     "standard" and "grid" engines.  Currently possible values are the
     character strings "dull", "shiny", "metal", and "default".}
 }
 \value{
   Returns a triangle mesh object representing the surface.
-  }
+}
 \seealso{
   \code{\link{persp}}, \code{\link[rgl]{rgl.surface}},
   \code{\link[rgl]{surface3d}}.
