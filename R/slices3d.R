@@ -8,22 +8,18 @@ vslice <- function(vol, which, k, tpt = 1) {
                x = vol[k,,,tpt],
                y = vol[,k,,tpt],
                z = vol[,,k,tpt])
-     else
+    else
         switch(which,
                x = vol[k,,],
                y = vol[,k,],
                z = vol[,,k])
 }
 
-slices3d <- function(vol, main="Three Planes View", scale = 0.8, col=gray.colors(512), cross = TRUE) {
-    if (! require(tkrplot)) stop("tkrplot is required.");
-    r <- range(vol,na.rm = TRUE)
-    d <- dim(vol)
-    dn <- c("x", "y", "z", "t")
-    tt <- tktoplevel()
-    tktitle(tt) <- main
-    bb <- c(round(d[1:3]) / 2, 1)
-    bbv <- lapply(bb, tclVar)
+slices3d <- function(vol1, vol2=NULL, rlim1=c(-Inf, Inf), rlim2=NULL,
+                     col1=gray.colors(512), col2=NULL,
+                     main="Three Planes View", scale = 0.8,
+                     alpha=1, cross = TRUE){
+
     mkimg <- function(which) {
         switch(which,
                x = { i <- 1; j <- 2; k <- 3 },
@@ -32,7 +28,15 @@ slices3d <- function(vol, main="Three Planes View", scale = 0.8, col=gray.colors
         f <- function() {
             opar = par(mar=c(0,0,0,0))
             on.exit(par(opar))
-            image(vslice(vol, which, bb[i],bb[4]),col=col, zlim = r)
+            if(!(is.array(col)))
+                image(vslice(vol, which, bb[i],bb[4]), col=col, zlim = rlim1)
+            else{
+                v <- switch(which,
+                           x = matrix(1:(d[2]*d[3]), nrow=d[2]),
+                           y = matrix(1:(d[1]*d[3]), nrow=d[1]),
+                           z = matrix(1:(d[1]*d[2]), nrow=d[1]))
+                image(v, col=vslice(col, which, bb[i],bb[4]))
+            }
             lines(rep(bb[j]/d[j],100), seq(0,1,len=100))
             lines(seq(0,1,len=100), rep(bb[k]/d[k],100))
         }
@@ -72,7 +76,47 @@ slices3d <- function(vol, main="Three Planes View", scale = 0.8, col=gray.colors
             tclvalue(bbv[[j]]) <<- as.character(round(bb[j]))
           }
         })
-      }
+    }
+    overlay <- function(vol1, vol2, rlim1, rlim2, col1, col2, alpha){
+        choose1 <- vol1 <= rlim1[2] & vol1 >= rlim1[1]
+        vol1 <- floor((length(col1) - .01) *
+                    (vol1 - min(vol1))/(max(vol1) - min(vol1)) + 1)
+        vol1c <- col1[vol1]
+        vol1c[!choose1] <- "white"
+
+        choose2 <- vol2 <= rlim2[2] & vol2 >= rlim2[1]
+        vol2 <- floor((length(col2) - .01) *
+                    (vol2 - min(vol2))/(max(vol2) - min(vol2)) + 1)
+        vol2c <- col2[vol2]
+        vol2c[!choose2] <- "transparent"
+        alpha <- as.vector(ifelse(choose2, alpha, 0))
+        col <- t(col2rgb(vol1c)) * (1 - alpha) + t(col2rgb(vol2c)) * alpha
+        array(rgb(col, maxColorValue=255), dim=dim(vol1))
+    }
+
+    if (! require(tkrplot)) stop("tkrplot is required.");
+
+    if(missing(rlim1))
+        rlim1 <- range(vol1,na.rm = TRUE)
+    if(is.null(vol2)){
+        vol <- vol1
+        col <- col1
+    }
+    else{
+        if(!all(dim(vol1 == vol2)))
+            stop("two layers have to have the same dimensions")
+        if(missing(rlim2))
+            rlim2 <- range(vol2,na.rm = TRUE)
+        col <- overlay(vol1, vol2, rlim1, rlim2, col1, col2, alpha)
+        vol <- array(0, dim=dim(vol1))
+    }
+
+    d <- dim(vol)
+    dn <- c("x", "y", "z", "t")
+    tt <- tktoplevel()
+    tktitle(tt) <- main
+    bb <- c(round(d[1:3]) / 2, 1)
+    bbv <- lapply(bb, tclVar)
     s <- lapply(1:3, mkscale)
     img <- lapply(c("x", "y", "z"), mkimg)
     tkgrid(img[[1]], img[[2]])

@@ -17,11 +17,12 @@ makeTriangles <- function(v1, v2, v3,
 	v2 <- v$v2
 	v3 <- v$v3
     }
-    structure(list(v1 = v1, v2 = v2, v3 = v3,
-                   color = color, color2 = color2, fill = fill,
-                   material = material, col.mesh = col.mesh, alpha = alpha,
-                   smooth = smooth),
-              class = "Triangles3D")
+    tris <- structure(list(v1 = v1, v2 = v2, v3 = v3,
+                           color = color, color2 = color2, fill = fill,
+                           material = material, col.mesh = col.mesh,
+                           alpha = alpha, smooth = smooth),
+                      class = "Triangles3D")
+    colorTriangles(tris)
 }
 
 is.Triangles3D <- function(x) identical(class(x), "Triangles3D")
@@ -35,7 +36,7 @@ updateTriangles <- function(triangles, color, color2, alpha, fill, col.mesh,
     if (! missing(material)) triangles$material <- material
     if (! missing(alpha)) triangles$alpha <- alpha
     if (! missing(smooth)) triangles$smooth <- smooth
-    triangles
+    colorTriangles(triangles)
 }
 
 #**** This assumes comparable scaling of dimensions

@@ -58,9 +58,9 @@ image3d <- function (v, x = 1:dim(v)[1], y = 1:dim(v)[2], z = 1:dim(v)[3],
     }
     if (sprites) {
         texture <- system.file("textures/particle.png", package="rgl")
-        sprites3d(xi, zi, -yi, color = col[vi], alpha = alpha[vi],
+        sprites3d(xi, yi, zi, color = col[vi], alpha = alpha[vi],
                     lit=FALSE, radius = radius, textype="alpha",
                     texture = texture, ...)
     } 
-    else points3d(xi, zi, -yi, color = col[vi], alpha = alpha[vi], ...)  
+    else points3d(xi, yi, zi, color = col[vi], alpha = alpha[vi], ...)  
 }

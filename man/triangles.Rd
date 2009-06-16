@@ -3,6 +3,7 @@
 \alias{updateTriangles}
 \alias{scaleTriangles}
 \alias{translateTriangles}
+\alias{transformTriangles}
 \title{Triangle Mesh Functions}
 \description{
   Functions to create and modify triangle mesh objects representing 3D
@@ -16,6 +17,7 @@ updateTriangles(triangles, color, color2, alpha, fill, col.mesh,
                 material, smooth)
 translateTriangles(triangles, x = 0, y = 0, z = 0)
 scaleTriangles(triangles, x = 1, y = x, z = x)
+transformTriangles(triangles, R)
 }
 \arguments{
   \item{v1,v2,v3}{specification of triangle coordinates. If all three
@@ -47,6 +49,7 @@ scaleTriangles(triangles, x = 1, y = x, z = x)
   \item{material}{material specification; currently only used by
     "standard" and "grid" engines. Currently possible values are the
     character strings "dull", "shiny", "metal", and "default".}
+  \item{R}{4 by 4 homogeneous coordinate transformation matrix to apply.}
 }
 \value{
   A triangle mesh object of class \code{Triangles3D}.
@@ -58,6 +61,9 @@ scaleTriangles(triangles, x = 1, y = x, z = x)
 
   \code{translateTriangles} and \code{scaleTriangles} translate or scale
   the vertex locations of triangle mesh objects by specified amounts.
+
+  \code{transformTriangles} applies a transformation specified by a 4 by
+  4 homogeneous transformation matrix.
 }
 \keyword{hplot}
 
