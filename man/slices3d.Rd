@@ -7,7 +7,8 @@
 }
 \usage{
 slices3d(vol1, vol2=NULL, rlim1, rlim2, col1, col2, main,
-         scale = 0.8, alpha=1, cross = TRUE)
+         scale = 0.8, alpha=1, cross = TRUE,
+         layout=c("counterclockwise", "clockwise"))
 }
 \arguments{
   \item{vol1}{a three or four dimensional real array. If two images are
@@ -27,7 +28,17 @@ slices3d(vol1, vol2=NULL, rlim1, rlim2, col1, col2, main,
   \item{scale}{real value for scaling embedded plot size.}
   \item{alpha}{real value for transparency level, if two images are
     overlaid. The default value is 1.}
-  \item{cross}{logical; if \code{TRUE}, show cross hairs of current slices.}
+  \item{cross}{logical; if \code{TRUE}, show cross hairs of current
+	slices.}
+  \item{layout}{a character string specifying the layout. It must be
+	either "counterclockwise" or "clockwise", and may be abbreviated.
+	The default is "counterclockwise". Images corresponding to
+	the x-y planes are always displayed in the third quadrant.
+	If \code{layout} is counterclockwise, then the first quadrant
+	shows images from the y-z planes and the second quadrant the x-z
+	planes.	Otherwise, the images in the first and the second quadrant
+	are switched. The fourth quadrant is left for the slider used to
+	select the value of the fourth index (if any) of input array(s).}
 }
 \details{
   Shows slices of 3D array along the axes as produced by \code{image},

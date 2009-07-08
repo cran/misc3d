@@ -18,7 +18,8 @@ vslice <- function(vol, which, k, tpt = 1) {
 slices3d <- function(vol1, vol2=NULL, rlim1=c(-Inf, Inf), rlim2=NULL,
                      col1=gray.colors(512), col2=NULL,
                      main="Three Planes View", scale = 0.8,
-                     alpha=1, cross = TRUE){
+                     alpha=1, cross = TRUE,
+                     layout=c("counterclockwise", "clockwise")){
 
     mkimg <- function(which) {
         switch(which,
@@ -111,21 +112,25 @@ slices3d <- function(vol1, vol2=NULL, rlim1=c(-Inf, Inf), rlim2=NULL,
         vol <- array(0, dim=dim(vol1))
     }
 
+    layout <- match.arg(layout)
+    layout <- switch(layout, counterclockwise = c(2,1,3), clockwise = c(1,2,3))
+    direct <- c("x", "y", "z")
     d <- dim(vol)
-    dn <- c("x", "y", "z", "t")
+    #dn <- c("x", "y", "z", "t")
+    dn <- c(direct, "t")
     tt <- tktoplevel()
     tktitle(tt) <- main
     bb <- c(round(d[1:3]) / 2, 1)
     bbv <- lapply(bb, tclVar)
-    s <- lapply(1:3, mkscale)
-    img <- lapply(c("x", "y", "z"), mkimg)
+    s <- lapply(layout, mkscale)
+    img <- lapply(direct[layout], mkimg)
     tkgrid(img[[1]], img[[2]])
     tkgrid(s[[1]],s[[2]])
     tkgrid(img[[3]])
     if (length(d) == 4 && d[4] > 1)
         tkgrid(s[[3]], mkscale(4))
     else tkgrid(s[[3]])
-    lapply(c("x", "y", "z"), move)
+    lapply(direct[layout], move)
 
     environment()
 }
