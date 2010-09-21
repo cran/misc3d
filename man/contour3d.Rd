@@ -9,7 +9,7 @@
    contour3d(f, level, x, y, z, mask = NULL, color = "white", color2 = NA,
              alpha = 1, fill = TRUE, col.mesh = if (fill) NA else color,
              material = "default", smooth = 0,
-             add = FALSE, draw = TRUE, engine = "rgl", ...)
+             add = FALSE, draw = TRUE, engine = "rgl", separate=FALSE, ...)
 }
 \arguments{
   \item{f}{a function of 3 arguments or a three dimensional array.}
@@ -49,6 +49,13 @@
     return contour triangles.}
   \item{engine}{character; currently "rgl", "standard", "grid" or "none";
     for "none" the computed triangles are returned.}
+  \item{separate}{logical and one for each \code{level}; if it is
+    \code{TRUE}, and either the \code{engine} is "none" or \code{draw}
+    is not true, the triangles from the corresponding \code{level}
+    are separated into disconnected chunks, namely that triangles from
+    different chunks have no vertex in common. The default is
+    \code{FALSE} for each level.
+  }
   \item{...}{additional rendering arguments, e.g. material and texture
     properties for the "rgl" engine.  See documentation for
     \code{\link[misc3d]{drawScene}} and \code{\link[misc3d]{drawScene.rgl}}}
@@ -165,6 +172,20 @@
             mask = m, engine="standard",
             scale = FALSE, screen=list(z = 60, x = -120))
   }
+
+  #Example 4: Separate the triangles from the contours of
+  #           mixture of three tri-variate normal densities
+  nmix3 <- function(x, y, z, m, s) {
+      0.3*dnorm(x, -m, s) * dnorm(y, -m, s) * dnorm(z, -m, s) +
+      0.3*dnorm(x, -2*m, s) * dnorm(y, -2*m, s) * dnorm(z, -2*m, s) +
+      0.4*dnorm(x, -3*m, s) * dnorm(y, -3 * m, s) * dnorm(z, -3*m, s) }
+  f <- function(x,y,z) nmix3(x,y,z,0.5,.1)
+  n <- 20
+  x <- y <- z <- seq(-2, 2, len=n)
+  contour3dObj <- contour3d(f, 0.35, x, y, z, draw=FALSE, separate=TRUE)
+  for(i in 1:length(contour3dObj))
+      contour3dObj[[i]]$color <- rainbow(length(contour3dObj))[i]
+  drawScene.rgl(contour3dObj)
 }
 \keyword{hplot}
 

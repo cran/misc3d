@@ -235,7 +235,7 @@ PreProcessing <- local({
             else  newEdge <- 13
             newEdge})
     }
-    
+
     GetEdges <- local({
         Edges <- apply(CaseRotationFlip[-c(1,256),], 1, getedge)
         Case <- cbind(seq(1:256), CaseRotationFlip[,c(1,3)])
@@ -277,7 +277,7 @@ PreProcessing <- local({
             }
             newFace})
     }
-    
+
     flipface <- function(case, face){
         if (face!=0){
             index <- explode(case+1)
@@ -354,7 +354,7 @@ PreProcessing <- local({
     list(Edges = GetEdges, Faces = GetFaces, EdgePoints = EdgePoints,
          FacePoints = FacePoints, CaseRotationFlip = CaseRotationFlip,
          special = special)
-}) 
+})
 
 Faces <- PreProcessing$Faces
 Edges <- PreProcessing$Edges
@@ -527,14 +527,14 @@ computeContour3d <- function (vol, maxvol, level,
                               x = 1:dim(vol)[1],
                               y = 1:dim(vol)[2],
                               z = 1:dim(vol)[3], mask) {
-  
+
     nx <- length(x)
     ny <- length(y)
     nz <- length(z)
 
     if (is.function(mask)) mask <- fgrid(mask, x, y, z)
     if (! all(mask)) vol[! mask] <- NA
-    
+
     v <- levCells(vol, level, maxvol)
     tcase <- CaseRotationFlip[v$t+1,1]-1
 
@@ -548,7 +548,7 @@ computeContour3d <- function (vol, maxvol, level,
         triangles <- PreRender(edges, p1,type=1, information)
     }
     else triangles <- matrix(0, nrow=0,ncol=3) # emty contour, e.g.
-    
+
     for (i in 1:length(special$name)){
         R <- which(tcase == special$name[i])
         if (length(R) > 0) {
@@ -629,8 +629,9 @@ contour3d <- function(f, level,
                       mask = NULL, color = "white", color2 = NA, alpha = 1,
                       fill = TRUE, col.mesh = if (fill) NA else color,
                       material = "default", smooth = 0,
-                      add = FALSE, draw = TRUE, engine = "rgl", ...){
-  
+                      add = FALSE, draw = TRUE, engine = "rgl",
+                      separate=FALSE,...){
+
     if (! all(is.finite(x), is.finite(y), is.finite(z)))
         stop("'x', 'y', and 'z' values must be finite and non-missing")
     if (is.function(f) || is.array(f) && length(dim(f)) == 3){
@@ -647,32 +648,60 @@ contour3d <- function(f, level,
 
         maxvol <- max(vol)
         minvol <- min(vol)
-        con <- which(level > maxvol | level < minvol)
+        #cat("The range of 'f' is between ", round(minvol,2), " and ", round(maxvol,2), ".\n", sep="")
+        con <- which(! level <= maxvol & level >= minvol)
         if (length(con) == length(level))
-            stop("The level has to be within the range of f")
+            stop(paste("The 'level' has to be within the range of 'f' (between ", round(minvol, 2), " and ", round(maxvol, 2),").\n", sep=""))
         else if (length(con) > 0){
-            warning(paste("The level ", level[con], " outside the range of f has been removed from the level list", sep=""))
+            warning(paste("The 'level' outside the range of 'f' (between ", round(minvol, 2), " and ", round(maxvol, 2), ") has been removed. \n", sep=""))
             level <- level[-con]
-            if (is.list(mask)) mask <- mask[-con] 
-            if (length(color) > 1) color <- color[-con] 
-            if (length(color2) > 1) color2 <- color2[-con] 
-            if (length(alpha) > 1) alpha <- alpha[-con] 
+            if (is.list(mask)) mask <- mask[-con]
+            if (length(color) > 1) color <- color[-con]
+            if (length(color2) > 1) color2 <- color2[-con]
+            if (length(alpha) > 1) alpha <- alpha[-con]
             if (length(fill) > 1) fill <- fill[-con]
             if (length(col.mesh) > 1) col.mesh <- col.mesh[-con]
-            if (length(material) > 1) material <- material[-con] 
-            if (length(smooth) > 1) smooth <- smooth[-con] 
+            if (length(material) > 1) material <- material[-con]
+            if (length(smooth) > 1) smooth <- smooth[-con]
         }
-    
+
       }
 
     else stop("vol has to be a function or a 3-dimensional array")
 
-    
-    
+
+
     scene <- contourTriangles(vol, maxvol, level, x, y, z, mask, color, color2,
                               alpha, fill, col.mesh, material, smooth)
-    if (! draw || engine == "none")
-        scene
+    if (! draw || engine == "none"){
+        if (! any(separate))
+            scene
+        else{
+            if (length(level)==1){
+                newScene <- separateTriangles(scene)
+                cat("Triangles are separated into ", length(newScene),
+                          " chunks.", "\n", sep="")
+            }
+            else{
+                if (length(separate) < length(level))
+                    separate <- c(separate, rep(FALSE, length(level)-length(separate)))
+
+                newScene <- NULL
+                for (i in 1:length(level)){
+                    if (separate[i]){
+                        new <- separateTriangles(scene[[i]])
+                        newScene <- c(newScene, new)
+                        cat("Triangles from level ", level[i],
+                                  " are separated into ", length(new), " chunks.",
+                                  "\n", sep="")
+                }
+                    else
+                        newScene <- c(newScene, list(scene[[i]]))
+                }
+            }
+            newScene
+        }
+    }
     else {
         scene <- colorScene(scene)
         if (engine == "rgl")

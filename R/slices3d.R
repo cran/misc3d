@@ -63,21 +63,35 @@ slices3d <- function(vol1, vol2=NULL, rlim1=c(-Inf, Inf), rlim2=NULL,
         fr
     }
     move <- function(which){
-        switch(which,
-               x = { i <- 1; j <- 2; k <- 3 },
-               y = { i <- 2; j <- 1; k <- 3 },
-               z = { i <- 3; j <- 1; k <- 2 })
+        if(lay=="clockwise"){
+            switch(which,
+                   x = { i <- 1; j <- 2; k <- 3 },
+                   y = { i <- 2; j <- 1; k <- 3 },
+                   z = { i <- 3; j <- 1; k <- 2 })
+        }
+        else{
+            switch(which,
+                   y = { i <- 1; j <- 2; k <- 3 },
+                   x = { i <- 2; j <- 1; k <- 3 },
+                   z = { i <- 3; j <- 1; k <- 2 })
+        }
         tkbind(img[[i]],"<Button-1>", function(x,y){
-          wid <- as.integer(tkwinfo("width",img[[i]]))
-          hei <- as.integer(tkwinfo("height",img[[i]]))
-          bb[j] <<- as.numeric(x)/wid*d[j]
-          bb[k] <<- d[k] - as.numeric(y)/hei*d[k]
-          for (j in 1:3){
-            tkrreplot(img[[j]])
-            tclvalue(bbv[[j]]) <<- as.character(round(bb[j]))
-          }
+            wid <- as.integer(tkwinfo("width",img[[i]]))
+            hei <- as.integer(tkwinfo("height",img[[i]]))
+            if(lay=="clockwise" || which=="z")
+                bb[j] <<- as.numeric(x)/wid*d[j]
+            else
+                bb[i] <<- as.numeric(x)/wid*d[i]
+            bb[k] <<- d[k] - as.numeric(y)/hei*d[k]
+                
+            
+            for (j in 1:3){
+                tkrreplot(img[[j]])
+                tclvalue(bbv[[j]]) <<- as.character(round(bb[j]))
+            }
         })
     }
+    
     overlay <- function(vol1, vol2, rlim1, rlim2, col1, col2, alpha){
         choose1 <- vol1 <= rlim1[2] & vol1 >= rlim1[1]
         vol1 <- floor((length(col1) - .01) *
@@ -112,8 +126,8 @@ slices3d <- function(vol1, vol2=NULL, rlim1=c(-Inf, Inf), rlim2=NULL,
         vol <- array(0, dim=dim(vol1))
     }
 
-    layout <- match.arg(layout)
-    layout <- switch(layout, counterclockwise = c(2,1,3), clockwise = c(1,2,3))
+    lay <- match.arg(layout)
+    layout <- switch(lay, counterclockwise = c(2,1,3), clockwise = c(1,2,3))
     direct <- c("x", "y", "z")
     d <- dim(vol)
     #dn <- c("x", "y", "z", "t")

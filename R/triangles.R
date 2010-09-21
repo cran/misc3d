@@ -3,7 +3,7 @@
 ## coordinates of the three vertices; each of these components is an n by
 ## 3 matrix.
 
-makeTriangles <- function(v1, v2, v3, 
+makeTriangles <- function(v1, v2, v3,
                           color = "red", color2 = NA, alpha = 1,
                           fill = TRUE, col.mesh = if (fill) NA else color,
 	                  smooth = 0,  material = "default") {
@@ -41,7 +41,7 @@ updateTriangles <- function(triangles, color, color2, alpha, fill, col.mesh,
 
 #**** This assumes comparable scaling of dimensions
 #**** 5 is the largest exponent for S that will work; smaller is OK
-t2ve <- function (triangles) 
+t2ve <- function (triangles)
 {
     vb <- rbind(triangles$v1, triangles$v2, triangles$v3)
     vbmin <- min(vb)
@@ -409,7 +409,7 @@ triangleMidTriangles <- function(vb, ib, VN) {
 ## y and function falues computed with f if f is a function or taken
 ## from f if f is a matrix.
 
-surfaceTriangles <- function(x, y, f, 
+surfaceTriangles <- function(x, y, f,
                              color = "red", color2 = NA,  alpha = 1,
                              fill = TRUE, col.mesh = if (fill) NA else color,
                              smooth = 0, material = "default") {
@@ -453,7 +453,7 @@ pointsTetrahedra <- function(x, y, z, size = 0.01, color = "black", ...) {
     my <- (a + b) / 4
     mz <- h / 4
 
-    A <- c(       -mx,    -my,    -mz)  
+    A <- c(       -mx,    -my,    -mz)
     B <- c(    1 - mx,    -my,    -mz)
     C <- c(1 / 2 - mx, a - my,    -mz)
     D <- c(1 / 2 - mx, b - my, h - mz)
@@ -474,10 +474,122 @@ pointsTetrahedra <- function(x, y, z, size = 0.01, color = "black", ...) {
     x4 <- rep(x, each = 4)
     y4 <- rep(y, each = 4)
     z4 <- rep(z, each = 4)
-  
+
     V1 <- cbind(x4 + sv1[,1], y4 + sv1[,2], z4 + sv1[,3])
     V2 <- cbind(x4 + sv2[,1], y4 + sv2[,2], z4 + sv2[,3])
     V3 <- cbind(x4 + sv3[,1], y4 + sv3[,2], z4 + sv3[,3])
 
     makeTriangles(V1, V2, V3, color = color, ...)
 }
+
+
+## Compute for each triangle the indices of triangles that share an
+## edge with it.  This could be done more efficiently.
+triangleNeighbors <- function(tris) {
+   ve <- misc3d:::t2ve(tris)
+   vt <- misc3d:::vertexTriangles(ve)
+   ib <- ve$ib
+   n.tri <- ncol(ib)
+   tn <- vector("list", n.tri)
+   for (i in 1 : n.tri) {
+       v1 <- unique(vt[[ib[1, i]]])
+       v2 <- unique(vt[[ib[2, i]]])
+       v3 <- unique(vt[[ib[3, i]]])
+       i12 <- intersect(v1, v2)
+       i23 <- intersect(v2, v3)
+       i31 <- intersect(v3, v1)
+       u <- union(union(i12, i23), i31)
+       tn[[i]] <- u[u != i]
+   }
+   tn
+}
+## 'unique' in unique(vt[[ib[1, i]]]) seems to be unnecessary
+## unless a triangle has essentially two vertices or one vertex
+triangleNeighbors <- function(tris) {
+   ve <- misc3d:::t2ve(tris)
+   vt <- misc3d:::vertexTriangles(ve)
+   ib <- ve$ib
+   n.tri <- ncol(ib)
+   tn <- vector("list", n.tri)
+   for (i in 1 : n.tri) {
+       v1 <- vt[[ib[1, i]]]
+       v2 <- vt[[ib[2, i]]]
+       v3 <- vt[[ib[3, i]]]
+       i12 <- intersect(v1, v2)
+       i23 <- intersect(v2, v3)
+       i31 <- intersect(v3, v1)
+       u <- union(union(i12, i23), i31)
+       tn[[i]] <- u[u != i]
+   }
+   tn
+}
+
+## Dijkstra's version of Rem's algorithm for computing equivalence
+## classes based on a number of vertices 1:nvert and a set of N edges
+## provided as an N x 2 matrix.
+GetPatches <- function(nvert, edges) {
+
+   f <- 1:nvert
+
+   if (!(is.vector(edges)) && dim(edges)[1] != 0){
+       nedge <- nrow(edges)
+
+       for (e in 1:nedge) {
+           p0 <- edges[e, 1]
+           q0 <- edges[e, 2]
+           p1 <- f[p0]
+           q1 <- f[q0]
+           while (p1 != q1) {
+               if (q1 < p1) {
+                   f[p0] <- q1
+                   p0 <- p1
+                   p1 <- f[p1]
+               }
+               else {
+                   f[q0] <- p1
+                   q0 <- q1
+                   q1 <- f[q1]
+               }
+           }
+       }
+   }
+   if(is.vector(edges)){
+       if(edges[1] < edges[2])
+           f[edges[2]] <- edges[1]
+       else  f[edges[1]] <- edges[2]
+   }
+
+   for (v in 1:nvert)
+       f[v] <- f[f[v]]
+
+   split(1:nvert,f)
+}
+
+## compute the edges to indicate which triangles share an edge -- this
+## needs more error checking
+triangleNeighborEdges <- function(tn) {
+   edges <- function(i) {
+       v <- tn[[i]]
+       if (length(v) > 0) cbind(i,v)
+       else numeric(0)
+   }
+   do.call(rbind, lapply(1:length(tn), edges))
+}
+
+## separate triangles into disconnected chunks
+separateTriangles <- function(contour3dObj){
+    tn <- triangleNeighbors(contour3dObj)
+    edges <- triangleNeighborEdges(tn)
+    edges <- edges[edges[,1] < edges[,2],]
+    p <- GetPatches(length(tn), edges)
+    newContour3dObj <- vector("list", length(p))
+    for(i in 1:length(newContour3dObj)){
+        newContour3dObj[[i]] <- contour3dObj
+        newContour3dObj[[i]]$v1 <- contour3dObj$v1[p[[i]],]
+        newContour3dObj[[i]]$v2 <- contour3dObj$v2[p[[i]],]
+        newContour3dObj[[i]]$v3 <- contour3dObj$v3[p[[i]],]
+    }
+    newContour3dObj
+
+}
+
