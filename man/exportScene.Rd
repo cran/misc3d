@@ -23,7 +23,7 @@ exportScene(scene, filename, format=c("OFF", "IDTF", "ASY"))
   \code{exportScene} writes out scenes to textual files,
   which can be used for other purposes, for example the
   generation of U3d and PRC files for interactive 3D visualization in
-  a PDF. See the accompanied vignette for more details.
+  a PDF. 
 }
 \examples{
   nmix3 <- function(x, y, z, m, s) {
