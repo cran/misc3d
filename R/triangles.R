@@ -366,7 +366,7 @@ vertexColors <- function(vt, col) {
 
 interpolateVertexColors <- function(VC, ib) {
     TC <- (VC[ib[1,],] + VC[ib[2,],] + VC[ib[3,],]) / 3
-    rgb(TC[,1], TC[,2], TC[,3], max=255)
+    rgb(TC[,1], TC[,2], TC[,3], maxColorValue = 255)
 }
 
 triangleEdges <- function(vb, ib) {
@@ -480,6 +480,130 @@ pointsTetrahedra <- function(x, y, z, size = 0.01, color = "black", ...) {
     V3 <- cbind(x4 + sv3[,1], y4 + sv3[,2], z4 + sv3[,3])
 
     makeTriangles(V1, V2, V3, color = color, ...)
+}
+
+bresenhamLine <- function(x1, y1, z1, x2, y2, z2, delta){
+
+    if (length(delta) < 3) delta <- rep(delta, len = 3)
+   
+    vertex <- rep(0,3)
+    vertex[1] <- x1
+    vertex[2] <- y1
+    vertex[3] <- z1
+    dx <- x2 - x1
+    dy <- y2 - y1
+    dz <- z2 - z1
+    
+    x_inc <- ifelse(dx < 0, -delta, delta)
+    l <- abs(dx)/delta[1]
+    y_inc <- ifelse(dy < 0, -delta, delta)
+    m <- abs(dy)/delta[2]
+    z_inc <- ifelse(dz < 0, -delta, delta)
+    n <- abs(dz)/delta[3]
+    
+    dx2 <- 2*l 
+    dy2 <- 2*m 
+    dz2 <- 2*n
+    
+    if ((l >= m) && (l >= n)){
+        err_1 <- dy2 - l
+        err_2 <- dz2 - l
+        Mat <- matrix(0, ncol=3, nrow=l+1)
+        ii <- 1
+        for (i in 1:l){
+            Mat[ii,] <- c(vertex[1],vertex[2],vertex[3])
+            if (err_1 > 0){ 
+                vertex[2] <- vertex[2] + y_inc
+                err_1 <- err_1 - dx2
+            }
+            if (err_2 > 0){
+                vertex[3] <- vertex[3]+ z_inc
+                err_2 <- err_2 - dx2
+            }
+            err_1 <- err_1 + dy2
+            err_2 <- err_2 + dz2
+            vertex[1] <- vertex[1] + x_inc
+            ii <- ii + 1
+        }
+    }
+    else if ((m >= l) && (m >= n)){ 
+        err_1 <- dx2 - m
+        err_2 <- dz2 - m
+        Mat <- matrix(0, ncol=3, nrow=m+1)
+        ii <- 1
+        for (i in 1:m){ 
+            Mat[ii,] <- c(vertex[1],vertex[2],vertex[3])
+            if (err_1 > 0){ 
+                vertex[1] <- vertex[1] + x_inc
+                err_1 <- err_1 - dy2
+            }
+            if (err_2 > 0){ 
+                vertex[3] <- vertex[3] + z_inc
+                err_2 <- err_2 - dy2
+            }
+            err_1 <- err_1 + dx2
+            err_2 <- err_2 + dz2
+            vertex[2] <- vertex[2] + y_inc
+            ii <- ii + 1
+        }
+    }
+    else{ 
+        err_1 <- dy2 - n
+        err_2 <- dx2 - n
+        Mat <- matrix(0, ncol=3, nrow=n+1)
+        ii <- 1
+        for (i in 1:n){
+            Mat[ii,] <- c(vertex[1],vertex[2],vertex[3])
+            if (err_1 > 0){ 
+                vertex[2] <- vertex[2] + y_inc
+                err_1 <- err_1 - dz2
+            }
+            if (err_2 > 0){ 
+                vertex[1] <- vertex[1] + x_inc
+                err_2 <- err_2 - dz2
+            }
+            err_1 <- err_1 + dy2
+            err_2 <- err_2 + dx2
+            vertex[3] <- vertex[3] + z_inc
+            ii <- ii + 1
+        }
+    }
+        
+    Mat[ii,] <- c(vertex[1],vertex[2],vertex[3])
+    Mat
+ }   
+
+linesTetrahedra <- function(x, y, z, delta=1, lwd = 0.01, color = "black", ...){
+
+    n <- length(x)
+    if (length(y) != n || length(z) != n)
+        stop("coordinates must be of the same length.")
+    if (is.vector(x)){
+        if (!is.vector(y) || !is.vector(z))
+            stop("coordinates have to be all vectors or matrices!")
+        if (length(x) != 2)
+            stop("need to specify the coordinates of starting and ending points.")
+
+        else{
+            x <- matrix(x, nrow=1)
+            y <- matrix(y, nrow=1)
+            z <- matrix(z, nrow=1)
+        }
+    }
+    if (is.matrix(x)){
+        if (!is.matrix(y) || !is.matrix(z))
+            stop("coordinates have to be all vectors or matrices!")
+        if (ncol(x) != 2)
+            stop("need to specify the coordinates of starting and ending points.")
+    }
+
+    nl <- nrow(x)
+    xyz <- do.call(rbind, lapply(1:nl, function(i)
+                                 bresenhamLine(x[i,1], y[i,1], z[i,1],
+                                               x[i,2], y[i,2], z[i,2],
+                                               delta)))
+    pointsTetrahedra(xyz[,1], xyz[,2], xyz[,3],
+                     size = lwd, color = color, ...) 
 }
 
 
