@@ -1,9 +1,17 @@
+if(! exists(".bincode", envir = .BaseNamespaceEnv))
+    .bincode <- function(v, breaks, ...) {
+        .C("bincode", as.double(v), length(v), as.double(breaks),
+           length(breaks), code = integer(length(v)), as.logical(TRUE),
+           as.logical(TRUE), nok = TRUE, NAOK = TRUE, DUP = FALSE,
+           PACKAGE = "base")$code
+    }
+
 image3d <- function (v, x = 1:dim(v)[1], y = 1:dim(v)[2], z = 1:dim(v)[3],
                      vlim = quantile(v, c(.9, 1),na.rm=TRUE),
                      col = heat.colors(256),
                      alpha.power = 2,
                      alpha = ((1:length(col))/ length(col))^alpha.power,
-                     breaks,sprites = TRUE, jitter = FALSE, 
+                     breaks,sprites = TRUE, jitter = FALSE,
                      radius = min(diff(x), diff(y), diff(z)),
                      add = FALSE,...)
 {
@@ -38,10 +46,7 @@ image3d <- function (v, x = 1:dim(v)[1], y = 1:dim(v)[2], z = 1:dim(v)[3],
             stop("must have one more break than alpha levels")
         if (any(!is.finite(breaks)))
             stop("breaks must all be finite")
-        vi <- .C("bincode", as.double(v), length(v), as.double(breaks),
-            length(breaks), code = integer(length(v)), as.logical(TRUE),
-            as.logical(TRUE), nok = TRUE, NAOK = TRUE, DUP = FALSE,
-            PACKAGE = "base")$code - 1
+        vi <- .bincode(v, breaks, TRUE, TRUE) - 1
     }
     if (!add)
         clear3d()
@@ -61,6 +66,6 @@ image3d <- function (v, x = 1:dim(v)[1], y = 1:dim(v)[2], z = 1:dim(v)[3],
         sprites3d(xi, yi, zi, color = col[vi], alpha = alpha[vi],
                     lit=FALSE, radius = radius, textype="alpha",
                     texture = texture, ...)
-    } 
-    else points3d(xi, yi, zi, color = col[vi], alpha = alpha[vi], ...)  
+    }
+    else points3d(xi, yi, zi, color = col[vi], alpha = alpha[vi], ...)
 }
