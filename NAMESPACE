@@ -1,6 +1,6 @@
 # Should import rgl once it has a name space
 
-export(contour3d)
+export(contour3d,computeContour3d)
 export(image3d)
 export(parametric3d)
 export(slices3d)

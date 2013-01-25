@@ -523,7 +523,7 @@ rescale <- function(i, x) {
     x[low] + (i - low) * (x[low + 1] - x[low])
 }
 
-computeContour3d <- function (vol, maxvol, level,
+computeContour3d <- function (vol, maxvol = max(vol), level,
                               x = 1:dim(vol)[1],
                               y = 1:dim(vol)[2],
                               z = 1:dim(vol)[3], mask) {
@@ -532,6 +532,7 @@ computeContour3d <- function (vol, maxvol, level,
     ny <- length(y)
     nz <- length(z)
 
+    if (missing(mask)) mask <- NULL
     if (is.function(mask)) mask <- fgrid(mask, x, y, z)
     if (! all(mask)) vol[! mask] <- NA
 

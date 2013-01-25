@@ -7,7 +7,10 @@
   centered at points along them.
 }
 \usage{
-linesTetrahedra(x, y, z, delta=1, lwd = 0.01, color = "black", ...)
+linesTetrahedra(x, y, z, delta=c(min(x[,2]-x[,1])/10,
+                                    min(y[,2]-y[,1])/10,
+                                    min(z[,2]-z[,1])/10),
+                lwd = 0.01, color = "black", ...)
 }
 \arguments{
   \item{x, y, z}{numeric vectors of length two or matrices with two

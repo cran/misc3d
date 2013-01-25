@@ -504,7 +504,7 @@ bresenhamLine <- function(x1, y1, z1, x2, y2, z2, delta){
     dx2 <- 2*l 
     dy2 <- 2*m 
     dz2 <- 2*n
-    
+
     if ((l >= m) && (l >= n)){
         err_1 <- dy2 - l
         err_2 <- dz2 - l
@@ -573,7 +573,11 @@ bresenhamLine <- function(x1, y1, z1, x2, y2, z2, delta){
     Mat
  }   
 
-linesTetrahedra <- function(x, y, z, delta=1, lwd = 0.01, color = "black", ...){
+linesTetrahedra <- function(x, y, z,
+                            delta=c(min(x[,2]-x[,1])/10,
+                                    min(y[,2]-y[,1])/10,
+                                    min(z[,2]-z[,1])/10),
+                            lwd = 0.01, color = "black", ...){
 
     n <- length(x)
     if (length(y) != n || length(z) != n)
