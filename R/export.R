@@ -3,11 +3,11 @@
 ## The format supports adding three or four rgb values to each face
 ## line, but MeshLab seems to ignore these.
 saveTrianglesAsOFF <- function(scene, filename = "scene.OFF") {
-    scene <- misc3d:::colorScene(scene)
-    triangles <- misc3d:::canonicalizeAndMergeScene(scene, "color", "color2",
+    scene <- colorScene(scene)
+    triangles <- canonicalizeAndMergeScene(scene, "color", "color2",
                                                     "alpha", "col.mesh",
                                                     "fill", "smooth")
-    ve <- misc3d:::t2ve(triangles)
+    ve <- t2ve(triangles)
     f <- file(filename, open = "w")
     on.exit(close(f))
     write("OFF", f)
@@ -22,12 +22,12 @@ saveTrianglesAsOFF <- function(scene, filename = "scene.OFF") {
 ## and material properties are not currently supported. The loops
 ## could be vectorized but seem adequate for now.
 saveTrianglesAsASY <- function(scene, filename = "scene.asy") {
-    scene <- misc3d:::colorScene(scene)
-    triangles <- misc3d:::canonicalizeAndMergeScene(scene, "color",
+    scene <- colorScene(scene)
+    triangles <- canonicalizeAndMergeScene(scene, "color",
                                                     "color2", "alpha",
                                                     "col.mesh", "fill",
                                                     "smooth")
-    ve <- misc3d:::t2ve(triangles)
+    ve <- t2ve(triangles)
     f <- file(filename, open = "w")
     on.exit(close(f))
 

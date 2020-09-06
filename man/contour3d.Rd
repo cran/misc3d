@@ -139,7 +139,7 @@
       al <- seq(alo, ahi, len = length(th))
       x <- seq(-2, 2, len=n)
       contour3d(f,th,x,x,x,color=col,alpha=al)
-      bg3d(col="white")
+      rgl::bg3d(col="white")
   }
   g(40,5)
   gs <- function(n = 40, k = 5, cmap = heat.colors, ...) {
@@ -149,7 +149,7 @@
       m <- function(x,y,z) x > .25 | y < -.3
       contour3d(f,th,x,x,x,color=col, mask = m, engine = "standard",
                 scale = FALSE, ...)
-      bg3d(col="white")
+      rgl::bg3d(col="white")
   }
   gs(40, 5, screen=list(z = 130, x = -80), color2 = "lightgray", cmap=rainbow)
 

@@ -1,5 +1,5 @@
 loadRGL <- function() {
-    if (! suppressWarnings(require(rgl,quietly=TRUE)))
+    if (! suppressWarnings(requireNamespace("rgl",quietly=TRUE)))
         stop("rgl is mot available")
 }
 

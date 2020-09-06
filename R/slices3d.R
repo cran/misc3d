@@ -41,7 +41,7 @@ slices3d <- function(vol1, vol2=NULL, rlim1=c(-Inf, Inf), rlim2=NULL,
             lines(rep(bb[j]/d[j],100), seq(0,1,len=100))
             lines(seq(0,1,len=100), rep(bb[k]/d[k],100))
         }
-        tkrplot(tt, f, hscale = 0.8, vscale = 0.8)
+        tkrplot::tkrplot(tt, f, hscale = 0.8, vscale = 0.8)
     }
     mkscale <- function(i) {
         f <- function(...) {
@@ -49,8 +49,8 @@ slices3d <- function(vol1, vol2=NULL, rlim1=c(-Inf, Inf), rlim2=NULL,
              if (b != bb[i]) {
                 bb[i] <<- b
                 if (cross || i == 4)
-                    for (j in 1:3) tkrreplot(img[[j]])
-                else  tkrreplot(img[[i]])
+                    for (j in 1:3) tkrplot::tkrreplot(img[[j]])
+                else  tkrplot::tkrreplot(img[[i]])
                 tkconfigure(l2, text=bb[i])
             }
         }
@@ -86,7 +86,7 @@ slices3d <- function(vol1, vol2=NULL, rlim1=c(-Inf, Inf), rlim2=NULL,
                 
             
             for (j in 1:3){
-                tkrreplot(img[[j]])
+                tkrplot::tkrreplot(img[[j]])
                 tclvalue(bbv[[j]]) <<- as.character(round(bb[j]))
             }
         })
@@ -109,7 +109,7 @@ slices3d <- function(vol1, vol2=NULL, rlim1=c(-Inf, Inf), rlim2=NULL,
         array(rgb(col, maxColorValue=255), dim=dim(vol1))
     }
 
-    if (! require(tkrplot)) stop("tkrplot is required.");
+    if (! requireNamespace("tkrplot")) stop("tkrplot is required.");
 
     if(missing(rlim1))
         rlim1 <- range(vol1,na.rm = TRUE)

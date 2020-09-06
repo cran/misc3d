@@ -1,7 +1,7 @@
 library(misc3d)
 
 local({
-    haveRGL <- suppressWarnings(require(rgl,quietly=TRUE))
+    haveRGL <- suppressWarnings(requireNamespace(rgl,quietly=TRUE))
 
     ## Example 1: Bivariate quadratic
     zz<-surfaceTriangles(seq(-1,1,len=30), seq(-1,1,len=30),

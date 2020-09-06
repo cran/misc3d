@@ -23,7 +23,7 @@ exportScene(scene, filename, format=c("OFF", "IDTF", "ASY"))
   \code{exportScene} writes out scenes to textual files,
   which can be used for other purposes, for example the
   generation of U3d and PRC files for interactive 3D visualization in
-  a PDF. 
+  a PDF.
 }
 \examples{
   nmix3 <- function(x, y, z, m, s) {
@@ -45,7 +45,8 @@ exportScene(scene, filename, format=c("OFF", "IDTF", "ASY"))
  
   conts <- gs1(40, 5, screen=list(z = 130, x = -80),
                color2 = "lightgray", cmap=rainbow)
-  exportScene(conts, "nmix", "OFF")
+  filename <- file.path(tempdir(), "nmix")
+  exportScene(conts, filename, "OFF")
 }
 \keyword{hplot}
 

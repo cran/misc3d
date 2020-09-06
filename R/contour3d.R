@@ -705,9 +705,13 @@ contour3d <- function(f, level,
     }
     else {
         scene <- colorScene(scene)
-        if (engine == "rgl")
-            drawScene.rgl(scene, add = add, ...)
-        else if (engine %in% c("standard", "grid"))
+        if (engine == "rgl") {
+            result <- drawScene.rgl(scene, add = add, ...)
+            if (add)
+              rgl::lowlevel(result)
+            else
+              rgl::highlevel(result)
+        } else if (engine %in% c("standard", "grid"))
             drawScene(scene, add = add, engine = engine, ...)
         else stop(paste("unknown rendering engine:", engine))
     }

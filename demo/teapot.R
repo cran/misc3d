@@ -3,7 +3,7 @@ library(misc3d)
 local({
     data(teapot)
 
-    haveRGL <- suppressWarnings(require(rgl,quietly=TRUE))
+    haveRGL <- suppressWarnings(requireNamespace(rgl,quietly=TRUE))
 
     ttri <- makeTriangles(teapot$vertices, teapot$edges,
                           color = "red", color2 = "green")

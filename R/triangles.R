@@ -345,7 +345,7 @@ triangleVertexNormals <- function(v) {
     N <- triangleNormals(v)
     ve <- t2ve(v)
     vt <- vertexTriangles(ve)
-    VN <- misc3d:::vertexNormals(vt, N)
+    VN <- vertexNormals(vt, N)
     list(v1 = VN[ve$ib[1,],], v2 = VN[ve$ib[2,],], v3 = VN[ve$ib[3,],])
 }
 
@@ -614,8 +614,8 @@ linesTetrahedra <- function(x, y, z,
 ## Compute for each triangle the indices of triangles that share an
 ## edge with it.  This could be done more efficiently.
 triangleNeighbors <- function(tris) {
-   ve <- misc3d:::t2ve(tris)
-   vt <- misc3d:::vertexTriangles(ve)
+   ve <- t2ve(tris)
+   vt <- vertexTriangles(ve)
    ib <- ve$ib
    n.tri <- ncol(ib)
    tn <- vector("list", n.tri)
@@ -634,8 +634,8 @@ triangleNeighbors <- function(tris) {
 ## 'unique' in unique(vt[[ib[1, i]]]) seems to be unnecessary
 ## unless a triangle has essentially two vertices or one vertex
 triangleNeighbors <- function(tris) {
-   ve <- misc3d:::t2ve(tris)
-   vt <- misc3d:::vertexTriangles(ve)
+   ve <- t2ve(tris)
+   vt <- vertexTriangles(ve)
    ib <- ve$ib
    n.tri <- ncol(ib)
    tn <- vector("list", n.tri)
