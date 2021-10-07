@@ -1,4 +1,4 @@
-fd578548ca8f55bfc3bda93510528108 *DESCRIPTION
+813abe51e0cde93ebc6eaffb7d15d27d *DESCRIPTION
 b30c7a8977ecf2ab8770d71a58302b40 *NAMESPACE
 264525a42b87a1c6db272446a84e839d *R/contour3d.R
 3d17f30bf2d9c85d1951dbabb750f9d3 *R/export.R
@@ -14,8 +14,8 @@ f9d4d32e8723451f399d0ebd007b55d1 *README
 ff1931aa94ed3dbcf867671d32ea06b6 *data/teapot.rda
 fcfe87523fa087e3102a01dcefe51e10 *demo/00Index
 a982ffe9f0a510480f437cd51e730d93 *demo/lighting.R
-e4287a50c4e2fef25853dab7d3093fc2 *demo/teapot.R
-467f972b28bb0a587aede069014a6807 *inst/CITATION
+a0f10d11a8c6e4ffe7e30f1e2febc757 *demo/teapot.R
+fbedf89b53792964c95c5e5bfb6e993c *inst/CITATION
 0c144caaee4fe1ad9568b5cc9d9e4080 *man/computeContour3d.Rd
 0b0ff37bddfe40a5a88770974f685227 *man/contour3d.Rd
 88d5b17cc124e9ae889947abf2fa013d *man/drawScene.Rd

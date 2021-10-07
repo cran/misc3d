@@ -8,12 +8,12 @@ citEntry(entry = "Article",
   year         = "2008",
   volume       = "28",
   number       = "1",
-  url          = "https://www.jstatsoft.org/v28/i01/",
+  doi          = "10.18637/jss.v028.i01",
 
   textVersion  =
   paste("Dai Feng, Luke Tierney (2008).",
         "Computing and Displaying Isosurfaces in R.",
         "Journal of Statistical Software 28(1).",
-        "URL https://www.jstatsoft.org/v28/i01/.")
+        "doi:10.18637/jss.v028.i01.")
 )
 
